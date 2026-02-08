@@ -3,7 +3,7 @@ name: Publish oauth-cli-kit
 on:
   push:
     tags:
-      - "v*"
+      - 'v*'
 
 permissions:
   contents: read
@@ -22,15 +22,15 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: '3.11'
 
       - name: Set up uv
         uses: astral-sh/setup-uv@v4
 
       - name: Build
-        working-directory: packages/oauth-cli-kit
+        working-directory: ./
         run: uv build
 
       - name: Publish
-        working-directory: packages/oauth-cli-kit
+        working-directory: ./
         run: uv publish
