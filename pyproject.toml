@@ -1,6 +1,6 @@
 [project]
 name = "oauth-cli-kit"
-version = "0.1.0"
+dynamic = ["version"]
 description = "Reusable OAuth 2.0 + PKCE helpers for CLI applications"
 requires-python = ">=3.11"
 license = {text = "MIT"}
@@ -20,7 +20,7 @@ dependencies = [
 ]
 
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling", "hatch-vcs"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
@@ -32,3 +32,6 @@ include = [
     "README.md",
     "LICENSE",
 ]
+
+[tool.hatch.version]
+source = "vcs"

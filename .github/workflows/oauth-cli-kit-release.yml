@@ -3,7 +3,7 @@ name: Publish oauth-cli-kit
 on:
   push:
     tags:
-      - "oauth-cli-kit-v*"
+      - "v*"
 
 permissions:
   contents: read
