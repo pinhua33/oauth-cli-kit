@@ -1,0 +1,101 @@
+name: Release (Auto Tag)
+
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: "版本号自增类型：patch/minor/major"
+        required: true
+        default: "patch"
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+
+permissions:
+  contents: write
+
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # 需要完整历史与 tags
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Compute next tag
+        id: next
+        env:
+          BUMP: ${{ inputs.bump }}
+        run: |
+          set -euo pipefail
+
+          git fetch --tags --force
+
+          # 取最新的 vX.Y.Z tag；没有则从 v0.1.0 开始（可按你们习惯改）
+          latest="$(git tag -l 'v[0-9]*.[0-9]*.[0-9]*' --sort=-v:refname | head -n1 || true)"
+          if [ -z "$latest" ]; then
+            latest="v0.1.0"
+          fi
+
+          ver="${latest#v}"
+          IFS='.' read -r major minor patch <<EOF
+          $ver
+EOF
+
+          major="${major:-0}"
+          minor="${minor:-0}"
+          patch="${patch:-0}"
+
+          case "$BUMP" in
+            major)
+              major=$((major + 1)); minor=0; patch=0
+              ;;
+            minor)
+              minor=$((minor + 1)); patch=0
+              ;;
+            patch)
+              patch=$((patch + 1))
+              ;;
+            *)
+              echo "Unknown bump: $BUMP" >&2
+              exit 1
+              ;;
+          esac
+
+          next="v${major}.${minor}.${patch}"
+          echo "latest=$latest" >> "$GITHUB_OUTPUT"
+          echo "tag=$next" >> "$GITHUB_OUTPUT"
+
+      - name: Create and push tag
+        env:
+          TAG: ${{ steps.next.outputs.tag }}
+          LATEST: ${{ steps.next.outputs.latest }}
+        run: |
+          set -euo pipefail
+          echo "Latest tag: $LATEST"
+          echo "Next tag:   $TAG"
+
+          # 防止重复 tag
+          if git rev-parse -q --verify "refs/tags/$TAG" >/dev/null; then
+            echo "Tag already exists: $TAG" >&2
+            exit 1
+          fi
+
+          git tag -a "$TAG" -m "Release $TAG"
+          git push origin "$TAG"
+
+      - name: Note
+        env:
+          TAG: ${{ steps.next.outputs.tag }}
+        run: |
+          echo "已推送 tag: $TAG"
+          echo "接下来会触发 .github/workflows/oauth-cli-kit-release.yml 进行构建与发布。"
+

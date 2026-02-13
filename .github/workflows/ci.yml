@@ -19,10 +19,6 @@ jobs:
       - name: Set up uv
         uses: astral-sh/setup-uv@v4
 
-      - name: Install (editable + dev extras)
-        # 使用 uv 的 pip 兼容命令安装项目与 dev 依赖（pytest）。
-        run: uv pip install -e ".[dev]"
-
       - name: Run tests
-        run: pytest
-
+        # 直接用 uv run，会自动创建并使用虚拟环境，避免 “No virtual environment found”。
+        run: uv run --extra dev pytest
