@@ -15,15 +15,33 @@ on:
 
 permissions:
   contents: write
+  # 发布到 PyPI（Trusted Publishing）需要 OIDC token
+  id-token: write
+
+env:
+  # GitHub Hosted Runner 无法访问内网源，强制使用公开 PyPI。
+  UV_INDEX_URL: https://pypi.org/simple
+  PIP_INDEX_URL: https://pypi.org/simple
 
 jobs:
   tag:
     runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/project/oauth-cli-kit/
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0 # 需要完整历史与 tags
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v4
 
       - name: Configure git
         run: |
@@ -73,7 +91,7 @@ jobs:
           echo "latest=$latest" >> "$GITHUB_OUTPUT"
           echo "tag=$next" >> "$GITHUB_OUTPUT"
 
-      - name: Create and push tag
+      - name: Create tag (local)
         env:
           TAG: ${{ steps.next.outputs.tag }}
           LATEST: ${{ steps.next.outputs.latest }}
@@ -89,11 +107,24 @@ jobs:
           fi
 
           git tag -a "$TAG" -m "Release $TAG"
+
+      - name: Build
+        # 版本号来自 git tag（hatch-vcs），必须先创建 tag 再构建。
+        run: uv build
+
+      - name: Publish
+        # 发布 dist/ 下的构建产物到 PyPI（使用 OIDC Trusted Publishing）。
+        run: uv publish
+
+      - name: Push tag
+        env:
+          TAG: ${{ steps.next.outputs.tag }}
+        run: |
+          set -euo pipefail
           git push origin "$TAG"
 
       - name: Note
         env:
           TAG: ${{ steps.next.outputs.tag }}
         run: |
-          echo "已推送 tag: $TAG"
-          echo "接下来会触发 .github/workflows/oauth-cli-kit-release.yml 进行构建与发布。"
+          echo "已发布并推送 tag: $TAG"
