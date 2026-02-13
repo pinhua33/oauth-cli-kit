@@ -46,9 +46,8 @@ jobs:
           fi
 
           ver="${latest#v}"
-          IFS='.' read -r major minor patch <<EOF
-          $ver
-EOF
+          # 这里不要用 heredoc（在 YAML 的 run: | 中容易因缩进导致语法错误）
+          IFS='.' read -r major minor patch <<< "$ver"
 
           major="${major:-0}"
           minor="${minor:-0}"
@@ -98,4 +97,3 @@ EOF
         run: |
           echo "已推送 tag: $TAG"
           echo "接下来会触发 .github/workflows/oauth-cli-kit-release.yml 进行构建与发布。"
-
