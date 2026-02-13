@@ -4,6 +4,12 @@ on:
   push:
   pull_request:
 
+env:
+  # GitHub Hosted Runner 无法访问你们内网的 bytedpypi 源，强制使用公开 PyPI。
+  # 如果你们希望用企业镜像，请替换为一个在 GitHub Runner 可访问的 index。
+  UV_INDEX_URL: https://pypi.org/simple
+  PIP_INDEX_URL: https://pypi.org/simple
+
 jobs:
   test:
     runs-on: ubuntu-latest

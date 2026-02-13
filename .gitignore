@@ -16,3 +16,5 @@ build/
 # Envs
 .venv/
 .env
+
+uv.lock
