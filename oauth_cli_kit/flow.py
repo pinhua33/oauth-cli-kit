@@ -12,8 +12,8 @@ from typing import Callable
 
 import httpx
 
-from oauth_cli_kit.constants import OPENAI_CODEX_PROVIDER
 from oauth_cli_kit.models import OAuthProviderConfig, OAuthToken
+from oauth_cli_kit.providers import OPENAI_CODEX_PROVIDER
 from oauth_cli_kit.pkce import (
     _create_state,
     _decode_account_id,

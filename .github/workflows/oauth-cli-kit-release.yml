@@ -28,9 +28,9 @@ jobs:
         uses: astral-sh/setup-uv@v4
 
       - name: Build
-        working-directory: packages/oauth-cli-kit
+        # 仓库当前为单包结构（pyproject.toml 在根目录），不使用 packages/ 子目录。
         run: uv build
 
       - name: Publish
-        working-directory: packages/oauth-cli-kit
+        # 发布 dist/ 下的构建产物到 PyPI（使用 OIDC Trusted Publishing）。
         run: uv publish

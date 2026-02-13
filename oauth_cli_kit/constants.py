@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from oauth_cli_kit.models import OAuthProviderConfig
+from oauth_cli_kit.providers.openai_codex import OPENAI_CODEX_PROVIDER
 
 SUCCESS_HTML = (
     "<!doctype html>"
@@ -18,14 +18,8 @@ SUCCESS_HTML = (
     "</html>"
 )
 
-OPENAI_CODEX_PROVIDER = OAuthProviderConfig(
-    client_id="app_EMoamEEZ73f0CkXaXp7hrann",
-    authorize_url="https://auth.openai.com/oauth/authorize",
-    token_url="https://auth.openai.com/oauth/token",
-    redirect_uri="http://localhost:1455/auth/callback",
-    scope="openid profile email offline_access",
-    jwt_claim_path="https://api.openai.com/auth",
-    account_id_claim="chatgpt_account_id",
-    default_originator="nanobot",
-    token_filename="codex.json",
-)
+# 兼容性：历史上从 oauth_cli_kit.constants 导入 provider。
+__all__ = [
+    "SUCCESS_HTML",
+    "OPENAI_CODEX_PROVIDER",
+]
